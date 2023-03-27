@@ -66,7 +66,7 @@
     </div>
     <div class="layout content">
       <div class="box content flex w-850px">
-        <n-card>
+        <n-card class="w-500px">
           <n-tabs type="line" animated class="">
             <!-- --------------------------Params------------------------- -->
             <n-tab-pane name="Params" tab="Params">
@@ -74,7 +74,7 @@
 
               <n-data-table
                 :columns="columnsParams"
-                :data="data"
+                :data="data1"
                 :pagination="pagination"
                 :bordered="false"
                 class="text-xs"
@@ -110,7 +110,7 @@
               <n-data-table
                 v-if="showContent"
                 :columns="columns"
-                :data="data"
+                :data="data1"
                 :pagination="pagination"
                 :bordered="false"
                 class="text-xs"
@@ -146,9 +146,14 @@
           <!-- <div class="text-green">Cookie</div> -->
         </n-card>
         <!-- ------------------------Response--------------------------------- -->
-        <div class="Response p-4">
+        <div class="Response p-4 w-350px ">
           <p>Response</p>
-          <div><img src="./img/reponse.jpg" class="w-90" /></div>
+          <div>
+            {{ data }}
+            {{ error }}
+          </div>
+
+          <!-- <div><img src="./img/reponse.jpg" class="w-90" /></div> -->
         </div>
       </div>
     </div>
@@ -156,8 +161,13 @@
 </template>
 
 <script setup>
+// https://6406b120862956433e575082.mockapi.io/
+
 import { h, defineComponent } from "vue"; //data-table
 import { NButton, useMessage } from "naive-ui"; ////data-table
+const { data, error } = useFetch(
+  "https://6406b120862956433e575082.mockapi.io/comment"
+);
 
 // -----------------------hidden--------------------------
 
@@ -229,7 +239,7 @@ const columns = [
   },
 ];
 const play = (row) => {};
-const data = [
+const data1 = [
   { no: 3, title: "Wonderwall", length: "4:18" },
   { no: 4, title: "Don't Look Back in Anger", length: "4:48" },
   { no: 12, title: "Champagne Supernova", length: "7:27" },

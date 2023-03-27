@@ -16,6 +16,7 @@ export default defineNuxtConfig({
     server: false,
     client: false,
   },
+  ssr: false,
 
   build: {
     transpile:
