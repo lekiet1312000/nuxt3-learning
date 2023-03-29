@@ -53,20 +53,21 @@
         </n-space>
       </div>
 
-      <n-input
+      <input
         class="w-70%"
         :input-props="{ type: 'url' }"
         placeholder="Enter URL or paste text"
+        v-model="inputData"
       />
 
       <n-button class="w-10% p-0">
-        <p class="w-6%">Send</p>
+        <p class="w-6%" @click="fetchData">Send</p>
         <div class="i-mdi:chevron-down text-xl w-4%"></div>
       </n-button>
     </div>
     <div class="layout content">
       <div class="box content flex w-850px">
-        <n-card class="w-500px">
+        <n-card clas="w-450px min-h-screen">
           <n-tabs type="line" animated class="">
             <!-- --------------------------Params------------------------- -->
             <n-tab-pane name="Params" tab="Params">
@@ -74,7 +75,7 @@
 
               <n-data-table
                 :columns="columnsParams"
-                :data="data1"
+                :data="data"
                 :pagination="pagination"
                 :bordered="false"
                 class="text-xs"
@@ -110,7 +111,7 @@
               <n-data-table
                 v-if="showContent"
                 :columns="columns"
-                :data="data1"
+                :data="data"
                 :pagination="pagination"
                 :bordered="false"
                 class="text-xs"
@@ -126,15 +127,6 @@
             </n-tab-pane>
             <!-- ----- --------------------Body---------------------------- -->
             <n-tab-pane name="Body" tab="Body" class="flex items-center">
-              <!-- <n-radio-group v-model:value="value" name="radiogroup">
-                <n-radio
-                  v-for="song in songs"
-                  :key="song.value"
-                  :value="song.value"
-                  :label="song.label"
-                  :radio="radio"
-                ></n-radio>
-              </n-radio-group> -->
               <n-space vertical class="JSON w-20%">
                 <n-select v-model:value="value" :options="optionsRaw" />
               </n-space>
@@ -146,14 +138,11 @@
           <!-- <div class="text-green">Cookie</div> -->
         </n-card>
         <!-- ------------------------Response--------------------------------- -->
-        <div class="Response p-4 w-350px ">
+        <div class="Response p-4 w-400px min-h-screen">
           <p>Response</p>
           <div>
-            {{ data }}
-            {{ error }}
+            {{ receivedData }}
           </div>
-
-          <!-- <div><img src="./img/reponse.jpg" class="w-90" /></div> -->
         </div>
       </div>
     </div>
@@ -161,14 +150,32 @@
 </template>
 
 <script setup>
-// https://6406b120862956433e575082.mockapi.io/
-
 import { h, defineComponent } from "vue"; //data-table
 import { NButton, useMessage } from "naive-ui"; ////data-table
-const { data, error } = useFetch(
-  "https://6406b120862956433e575082.mockapi.io/comment"
-);
 
+// ----------------ĐÂY LÀ ĐOẠN  NHẬP URL VÀO INPUT TRẢ RA DỮ LIỆU---------------------
+const inputData = ref("");// lưu trữ phần tử của input và được sử dụng để gọi hàm useFetch() để tải dữ liệu từ API
+const receivedData = ref(""); // lưu trữ dữ liệu nhận được từ API.Dữ liệu này sẽ được hiển thị trên màn hình để người dùng có thể xem
+const fetchData = async () => { //hàm này được sử dụng để gọi hàm useFetch() để tải dữ liệu từ API. Sau đó, dữ liệu nhận được từ API sẽ được lưu trữ trong biến receivedData, và được hiển thị trên màn hình để người dùng có thể xem.
+  const { data: test } = await useFetch(inputData.value);
+  console.log(test);
+  receivedData.value = JSON.stringify(test.value, undefined, 2);
+}
+
+
+//----------------BIẾN GIỮ PHƯƠNG THỨC GET---------------
+// get(url, options, method = "GET") {
+//   return useFetch(url, {
+//     baseURL: useRuntimeConfig().public.baseURL,
+//     method: method,
+//     headers: {
+//       "Content-type": "application/json; charset=UTF-8",
+//       Authorization: this.TOKEN,
+//     },
+//     ...options,
+//     ...this.handler,
+//   });
+// }
 // -----------------------hidden--------------------------
 
 const showContent = ref(true);
@@ -176,10 +183,13 @@ function toggleContent() {
   showContent.value = !showContent.value; // ! thay đổi true flash
 } // showContent.value hiển thị giá trị ref
 // --------------------------------NewReques----------------------------
+
 const options = [
   {
     label: "GET",
     value: "Option 1",
+    // id: "1",
+    key: "1",
   },
   {
     label: "POST",
@@ -217,29 +227,14 @@ const columns = [
     title: "Description",
     key: "length",
   },
-  // {
-  //   title: "...",
-  //   key: "actions",
-  //   render(row) {
-  //     return h(
-  //       NButton,
-  //       {
-  //         strong: true,
-  //         tertiary: true,
-  //         size: "small",
-  //         onClick: () => play(row),
-  //       },
-  //       { default: () => "Play" }
-  //     );
-  //   },
-  // },
+
   {
     title: "Bulk Edit",
     key: "length",
   },
 ];
 const play = (row) => {};
-const data1 = [
+const data = [
   { no: 3, title: "Wonderwall", length: "4:18" },
   { no: 4, title: "Don't Look Back in Anger", length: "4:48" },
   { no: 12, title: "Champagne Supernova", length: "7:27" },
@@ -279,71 +274,10 @@ const columnsParams = [
   {
     title: "...",
     key: "actions",
-    // render(row) {
-    //   return h(
-    //     NButton,
-    //     {
-    //       strong: true,
-    //       tertiary: true,
-    //       size: "small",
-    //       onClick: () => play(row),
-    //     },
-    //     { default: () => "Play" }
-    //   );
-    // },
   },
   {
     title: "Bulk Edit",
     key: "length",
   },
-  // {
-  //   title: "Bulk Edit",
-  //   key: "length",
-  // },
 ];
-
-// const play = (row) => {};
-// const data = [
-//   { no: 3, title: "Wonderwall", length: "4:18" },
-//   { no: 4, title: "Don't Look Back in Anger", length: "4:48" },
-//   { no: 12, title: "Champagne Supernova", length: "7:27" },
-// ];
-// let pagination = false;
-
-// const columns = [
-//   {
-//     title: "No",
-//     key: "no",
-//   },
-//   {
-//     title: "Title",
-//     key: "title",
-//   },
-//   {
-//     title: "Length",
-//     key: "length",
-//   },
-//   {
-//     title: "Action",
-//     key: "actions",
-//     render(row) {
-//       return h(
-//         NButton,
-//         {
-//           strong: true,
-//           tertiary: true,
-//           size: "small",
-//           onClick: () => play(row),
-//         },
-//         { default: () => "Play" }
-//       );
-//     },
-//   },
-// ];
-
-// const data = [
-//   { no: 3, title: "Wonderwall", length: "4:18" },
-//   { no: 4, title: "Don't Look Back in Anger", length: "4:48" },
-//   { no: 12, title: "Champagne Supernova", length: "7:27" },
-// ];
 </script>

@@ -53,20 +53,21 @@
         </n-space>
       </div>
 
-      <n-input
+      <input
         class="w-70%"
         :input-props="{ type: 'url' }"
         placeholder="Enter URL or paste text"
+        v-model="inputData"
       />
 
       <n-button class="w-10% p-0">
-        <p class="w-6%">Send</p>
+        <p class="w-6%" @click="fetchData">Send</p>
         <div class="i-mdi:chevron-down text-xl w-4%"></div>
       </n-button>
     </div>
     <div class="layout content">
       <div class="box content flex w-850px">
-        <n-card>
+        <n-card clas="w-450px min-h-screen">
           <n-tabs type="line" animated class="">
             <!-- --------------------------Params------------------------- -->
             <n-tab-pane name="Params" tab="Params">
@@ -146,9 +147,11 @@
           <!-- <div class="text-green">Cookie</div> -->
         </n-card>
         <!-- ------------------------Response--------------------------------- -->
-        <div class="Response p-4">
+        <div class="Response p-4 w-400px min-h-screen">
           <p>Response</p>
-          <div><img src="./img/reponse.jpg" class="w-90" /></div>
+          <div>
+            {{ receivedData }}
+          </div>
         </div>
       </div>
     </div>
@@ -158,6 +161,15 @@
 <script setup>
 import { h, defineComponent } from "vue"; //data-table
 import { NButton, useMessage } from "naive-ui"; ////data-table
+
+const inputData = ref(""); // lưu trữ phần tử của input và được sử dụng để gọi hàm useFetch() để tải dữ liệu từ API
+const receivedData = ref(""); // lưu trữ dữ liệu nhận được từ API.Dữ liệu này sẽ được hiển thị trên màn hình để người dùng có thể xem
+const fetchData = async () => {
+  //hàm này được sử dụng để gọi hàm useFetch() để tải dữ liệu từ API. Sau đó, dữ liệu nhận được từ API sẽ được lưu trữ trong biến receivedData, và được hiển thị trên màn hình để người dùng có thể xem.
+  const { data: test } = await useFetch(inputData.value);
+  console.log(test);
+  receivedData.value = JSON.stringify(test.value, undefined, 2);
+};
 
 // -----------------------hidden--------------------------
 
@@ -207,6 +219,7 @@ const columns = [
     title: "Description",
     key: "length",
   },
+
   // {
   //   title: "...",
   //   key: "actions",
