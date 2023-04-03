@@ -4,6 +4,9 @@ import { NaiveUiResolver } from "unplugin-vue-components/resolvers";
 export default defineNuxtConfig({
   ssr: false,
   modules: ["@unocss/nuxt"],
+  app: {
+    baseURL: "/nuxt-github-pages/", // baseURL: '/<repository>/'
+  },
 
   pinia: {
     autoImports: [

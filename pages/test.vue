@@ -49,7 +49,7 @@
     <div class="box menu flex">
       <div class="relative w-20%">
         <n-space vertical>
-          <n-select v-model:value="value" :options="options" />
+          <n-select v-model:value="selectRef" :options="options" />
         </n-space>
       </div>
 
@@ -60,9 +60,9 @@
         v-model="inputData"
       />
 
-      <n-button class="w-10% p-0">
-        <p class="w-6%" @click="fetchData">Send</p>
-        <div class="i-mdi:chevron-down text-xl w-4%"></div>
+      <n-button class="w-10% p-0 bg-blue" @click="getApi">
+        <p class="w-6%">Send</p>
+        <!-- <div class="i-mdi:chevron-down text-xl w-4%"></div> -->
       </n-button>
     </div>
     <div class="layout content">
@@ -72,20 +72,55 @@
             <!-- --------------------------Params------------------------- -->
             <n-tab-pane name="Params" tab="Params">
               <p class="">Query Params</p>
-
-              <n-data-table
-                :columns="columnsParams"
-                :data="data"
-                :pagination="pagination"
-                :bordered="false"
-                class="text-xs"
-              />
+              <n-table>
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Key</th>
+                    <th>Value</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(param, index) in params" :key="index">
+                    <td></td>
+                    <td>
+                      <input
+                        class="border-none"
+                        placeholder="Key"
+                        type="text"
+                        v-model="param.key"
+                        @input="handleInput(index)"
+                      />
+                    </td>
+                    <td>
+                      <input
+                        placeholder="Value"
+                        class="border-none"
+                        type="text"
+                        v-model="param.value"
+                        @input="handleInput(index)"
+                      />
+                    </td>
+                    <td>
+                      <input
+                        placeholder="Description"
+                        class="border-none"
+                        type="text"
+                        v-model="param.description"
+                        @input="handleInput(index)"
+                      />
+                      <button @click="removeParam(index)">Remove</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </n-table>
             </n-tab-pane>
 
             <!-- --------------------------Headers------------------------- -->
             <n-tab-pane name="Headers" tab="Headers">
               <div class="flex w-100 mb-4">
-                <p class="mr-3">Header</p>
+                <test2 />
                 <div
                   class="bg-gray-1 border-none cursor-pointer flex items-center"
                   @click="toggleContent"
@@ -126,13 +161,18 @@
               />
             </n-tab-pane>
             <!-- ----- --------------------Body---------------------------- -->
-            <n-tab-pane name="Body" tab="Body" class="flex items-center">
-              <n-space vertical class="JSON w-20%">
-                <n-select v-model:value="value" :options="optionsRaw" />
-              </n-space>
-              <n-space vertical class="JSON w-20%">
-                <n-select v-model:value="value" :options="optionsJson" />
-              </n-space>
+            <n-tab-pane name="Body" tab="Body" class="">
+              <div class="flex items-center mb-10px">
+                <n-space vertical class="JSON w-20%">
+                  <n-select v-model:value="valueRef" :options="optionsRaw" />
+                </n-space>
+                <n-space vertical class="JSON w-20%">
+                  <n-select v-model:value="value1Ref" :options="optionsJson" />
+                </n-space>
+              </div>
+              <input type="text" v-model="pageBody" />
+              <!-- <pre>{{ JSON.stringify(value, null, 2) }}</pre> -->
+              <div>{{ pageBody }}</div>
             </n-tab-pane>
           </n-tabs>
           <!-- <div class="text-green">Cookie</div> -->
@@ -140,9 +180,7 @@
         <!-- ------------------------Response--------------------------------- -->
         <div class="Response p-4 w-400px min-h-screen">
           <p>Response</p>
-          <div>
-            {{ receivedData }}
-          </div>
+          <pre>{{ JSON.stringify(receivedData, null, 2) }}</pre>
         </div>
       </div>
     </div>
@@ -150,32 +188,47 @@
 </template>
 
 <script setup>
+import Test2 from "./test2.vue";
 import { h, defineComponent } from "vue"; //data-table
 import { NButton, useMessage } from "naive-ui"; ////data-table
+import axios from "axios";
+import { ref, watchEffect } from "vue";
+// ---------------------------------Params--------------------------------
+const params = ref([{ key: "", value: "", description: "" }]);
 
-// ----------------ĐÂY LÀ ĐOẠN  NHẬP URL VÀO INPUT TRẢ RA DỮ LIỆU---------------------
-const inputData = ref("");// lưu trữ phần tử của input và được sử dụng để gọi hàm useFetch() để tải dữ liệu từ API
-const receivedData = ref(""); // lưu trữ dữ liệu nhận được từ API.Dữ liệu này sẽ được hiển thị trên màn hình để người dùng có thể xem
-const fetchData = async () => { //hàm này được sử dụng để gọi hàm useFetch() để tải dữ liệu từ API. Sau đó, dữ liệu nhận được từ API sẽ được lưu trữ trong biến receivedData, và được hiển thị trên màn hình để người dùng có thể xem.
-  const { data: test } = await useFetch(inputData.value);
-  console.log(test);
-  receivedData.value = JSON.stringify(test.value, undefined, 2);
+function handleInput(index) {
+  if (index === params.value.length - 1) {
+    params.value.push({ key: "", value: "", description: "" });
+  }
 }
 
+function removeParam(index) {
+  params.value.splice(index, 1);
+}
 
-//----------------BIẾN GIỮ PHƯƠNG THỨC GET---------------
-// get(url, options, method = "GET") {
-//   return useFetch(url, {
-//     baseURL: useRuntimeConfig().public.baseURL,
-//     method: method,
-//     headers: {
-//       "Content-type": "application/json; charset=UTF-8",
-//       Authorization: this.TOKEN,
-//     },
-//     ...options,
-//     ...this.handler,
-//   });
-// }
+watchEffect(() => {
+  const lastParam = params.value[params.value.length - 1];
+  if (lastParam.key || lastParam.value || lastParam.description) {
+    params.value.push({ key: "", value: "", description: "" });
+  }
+});
+
+// const add = (inputKeyparams, inputValueparams) => {
+//   inputData.value = inputData.value + inputKeyparams + inputValueparams;
+// };
+
+const inputData = ref("https://6406b120862956433e575082.mockapi.io/comment"); // lưu trữ phần tử của input và được sử dụng để gọi hàm useFetch() để tải dữ liệu từ API
+const selectRef = ref(1);
+const receivedData = ref(null); // lưu trữ dữ liệu nhận được từ API.Dữ liệu này sẽ được hiển thị trên màn hình để người dùng có thể xem
+const pageBody = ref("");
+// const getApi = async () => {
+//   //hàm này được sử dụng để gọi hàm useFetch() để tải dữ liệu từ API. Sau đó, dữ liệu nhận được từ API sẽ được lưu trữ trong biến receivedData, và được hiển thị trên màn hình để người dùng có thể xem.
+//   const { data: test } = await useFetch(inputData.value);
+//   console.log(test);
+
+//   receivedData.value = JSON.stringify(test.value, undefined, 2);
+// };
+
 // -----------------------hidden--------------------------
 
 const showContent = ref(true);
@@ -183,35 +236,124 @@ function toggleContent() {
   showContent.value = !showContent.value; // ! thay đổi true flash
 } // showContent.value hiển thị giá trị ref
 // --------------------------------NewReques----------------------------
-
 const options = [
   {
     label: "GET",
-    value: "Option 1",
-    // id: "1",
-    key: "1",
+    value: 1,
   },
   {
     label: "POST",
-    value: "Option 2",
+    value: 2,
   },
   {
     label: "PUT",
-    value: "Option 3",
+    value: 3,
   },
   {
     label: "PATCH",
-    value: "Option 4",
+    value: 4,
   },
   {
     label: "DELETE",
-    value: "Option 5",
-  },
-  {
-    label: "COPY",
-    value: "Option 6",
+    value: 5,
   },
 ];
+
+const getApi = (params) => {
+  switch (selectRef.value) {
+    case 1:
+      console.log("get"); // case =1 =1 thì là GET
+      handleGet(); // đặt hàm GET ở đây để chạy GET ở dưới
+      break;
+    case 2:
+      console.log("post");
+      handlePost();
+      break;
+    case 3:
+      console.log("put");
+      handlePut();
+      break;
+    case 4:
+      console.log("patch");
+      handlePatch();
+      break;
+    case 5:
+      console.log("delete");
+      handleDelete();
+      break;
+    default:
+      break;
+  }
+};
+
+const handleGet = async () => {
+  try {
+    const response = await axios.get(inputData.value);
+    receivedData.value = response.data;
+    console.log("🚀 ~ file: detail.vue:365 ~ handleGet ~ x:", response.data);
+  } catch (error) {
+    console.log(error);
+  }
+};
+// ---------------------POST-----------------------
+const handlePost = async () => {
+  try {
+    const response = await axios.post(
+      inputData.value,
+      pageBody.value ? JSON.parse(pageBody.value) : null // nếu điều kiện về thứ nhất đúng sẽ lấy gtri vế t2-toán tử 3 ngôi
+    ); //trả ra null ở pageBody chứ ko phải response
+    receivedData.value = response.data;
+    console.log(
+      "🚀 ~ file: detail.vue:373 ~ handlePost ~ data:",
+      response.data
+    );
+  } catch (error) {
+    //console.log(error);
+  }
+};
+
+// --------------sử dụng useFetch--------------------
+// const handlePost = async () => {
+//   const { data, error, pending, refresh } = await useFetch(inputData.value, {
+//     method: "POST",
+
+//     body: JSON.parse(pageBody.value),
+//   });
+
+//   receivedData.value = data.value;
+//   console.log("🚀 ~ file: detail.vue:373 ~ handlePost ~ data:", data.value);
+// };
+// ------------------------PUT-------------------
+const handlePut = async () => {
+  try {
+    const response = await axios.put(
+      inputData.value,
+      JSON.parse(pageBody.value)
+    );
+    receivedData.value = response.data;
+    console.log(
+      "🚀 ~ file: detail.vue:373 ~ handlePost ~ data:",
+      response.data
+    );
+  } catch (error) {
+    console.log(error);
+  }
+};
+// ----------------------------------DELETE------------------------------
+const handleDelete = async () => {
+  try {
+    const response = await axios.delete(inputData.value);
+    receivedData.value = response.data;
+    console.log(response.data);
+  } catch (error) {
+    console.log(error);
+  }
+  // const { data, error, pending, refresh } = await useFetch(inputData.value, {
+  //   method: "DELETE",
+  // });
+  // receivedData.value = data.value;
+  // console.log("🚀 ~ file: detail.vue:373 ~ handleDelete ~ data:", data);
+};
 // -----------------------------Header--------------------
 
 const columns = [
@@ -253,7 +395,7 @@ const optionsJson = [
 const optionsRaw = [
   {
     label: "Raw",
-    value: "Option 7",
+    // value: "Option 7",
   },
 ];
 //-------------------Params------------

@@ -5,7 +5,7 @@
     <div class="bg-#F5F5F5 min-h-screen w-25% p-2">
       <!-- ----header-sb---------- -->
       <div class="flex">
-        <button class="h-26px border-none bg-#f5f5f5" @click="addCollection">
+        <button class="h-27px border-none bg-#f5f5f5" @click="addCollection">
           <div class="i-mdi:plus text-xl"></div>
         </button>
 
@@ -16,7 +16,7 @@
           </div>
         </form>
 
-        <button class="w-9 h-26px border-none bg-#f5f5f5">
+        <button class="w-7 h-26px border-none bg-#f5f5f5">
           <div class="i-mdi:dots-horizontal text-xl"></div>
         </button>
       </div>
