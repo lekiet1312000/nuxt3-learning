@@ -12,6 +12,7 @@
       <input v-model="param.description" @input="handleInput(index)" />
 
       <button @click="removeParam(index)">Remove</button>
+      
     </div>
   </div>
 </template>
@@ -31,7 +32,7 @@ function removeParam(index) {
   params.value.splice(index, 1);
 }
 
-0(() => {
+watchEffect(() => {
   const lastParam = params.value[params.value.length - 1];
   if (lastParam.key || lastParam.value || lastParam.description) {
     params.value.push({ key: "", value: "", description: "" });
