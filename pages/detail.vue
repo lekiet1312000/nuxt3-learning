@@ -82,12 +82,9 @@
                   </tr>
                 </thead>
                 <tbody>
-                 
                   <tr v-for="(param, index) in params" :key="index">
                     <td>
-                    <n-checkbox>
-
-                    </n-checkbox>
+                      <n-checkbox> </n-checkbox>
                     </td>
                     <td>
                       <input
@@ -114,7 +111,6 @@
                         type="text"
                         v-model="param.description"
                         @input="handleInput(index)"
-                        
                       />
                       <button @click="removeParam(index)">X</button>
                     </td>
@@ -299,7 +295,7 @@ const handlePost = async () => {
   }
 };
 
-// --------------sử dụng useFetch--------------------
+// --------------sử dụng axios--------------------
 // const handlePost = async () => {
 //   const { data, error, pending, refresh } = await useFetch(inputData.value, {
 //     method: "POST",
