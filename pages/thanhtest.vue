@@ -7,7 +7,7 @@
       class="w-50%"
     />
     <div v-for="(param, index) in params" :key="index">
-      <n-checkbox></n-checkbox>
+      <n-checkbox id="checkLe"></n-checkbox>
       <input v-model="param.key" @input="handleInput(index)" />
       <input v-model="param.value" @input="handleInput(index)" />
       <input v-model="param.description" @input="handleInput(index)" />
@@ -16,23 +16,19 @@
     <div></div>
   </div>
 </template>
-
 <script setup>
-import { ref, watchEffect, watch } from "vue";
+import { ref, watchEffect } from "vue";
 
 const params = ref([{ key: "", value: "", description: "" }]);
-const inputData = ref("http://google.com");
-
+const inputData = ref();
 function handleInput(index) {
   if (index === params.value.length - 1) {
     params.value.push({ key: "", value: "", description: "" });
   }
 }
-
 function removeParam(index) {
   params.value.splice(index, 1);
 }
-
 function updateInputData() {
   let result = "";
   for (let i = 0; i < params.value.length; i++) {
@@ -44,19 +40,16 @@ function updateInputData() {
   if (result.length > 0) {
     result = "?" + result.slice(0, -1);
   }
-  inputData.value = "http://google.com" + result;
+  inputData.value = "URL" + result;
 }
-
 watchEffect(() => {
   updateInputData();
+  const lastParam = params.value[params.value.length - 1];
+  if (lastParam.key || lastParam.value || lastParam.description) {
+    params.value.push({ key: "", value: "", description: "" });
+  }
+  console.log(params.value);
 });
 
-watch(inputData, (newVal, oldVal) => {
-  // Split the input data by "?" and "&" to get the key-value pairs
-  const paramsArr = newVal.split(/[?&]/).slice(1);
-  params.value = paramsArr.map((param) => {
-    const [key, value] = param.split("=");
-    return { key, value, description: "" };
-  });
-});
+
 </script>

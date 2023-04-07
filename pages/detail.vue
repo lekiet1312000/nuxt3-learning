@@ -1,5 +1,7 @@
 <template>
+
   <div class="content bg-white p-5 pt-2 pb-2 min-h-screen w-75%">
+  <!-- -----------------------------------------HEADER-------------------------------------------- -->
     <div class="layout-header flex justify-between">
       <div class="flex">
         <div>
@@ -16,7 +18,6 @@
           <p>New Request</p>
         </div>
       </div>
-
       <div class="mr-5">
         <nav>
           <ul class="flex list-none">
@@ -29,7 +30,7 @@
                 <div class="i-mdi:chevron-down text-xl"></div>
               </n-button>
             </li>
-            <li class="ml-5 flex items-center">
+            <li class="ml-5 items-center">
               <n-button class="i-mdi:dots-horizontal text-xl"></n-button>
             </li>
             <li class="ml-5 flex items-center bg-gray-1 p-1">
@@ -45,6 +46,7 @@
         </nav>
       </div>
     </div>
+    <!-- ---------------------------------------------INPUT-SEND-METHOD-------------------------------------------- -->
     <hr />
     <div class="box menu flex">
       <div class="relative w-20%">
@@ -65,6 +67,7 @@
         <!-- <div class="i-mdi:chevron-down text-xl w-4%"></div> -->
       </n-button>
     </div>
+    <!-- ----------------------------------------------------------------CONTENT--------------------------------------------------------------- -->
     <div class="layout content">
       <div class="box content flex w-850px">
         <n-card clas="w-450px min-h-screen">
@@ -72,54 +75,17 @@
             <!-- --------------------------Params------------------------- -->
             <n-tab-pane name="Params" tab="Params">
               <p class="">Query Params</p>
-              <n-table class=" ">
-                <thead>
-                  <tr class="">
-                    <th></th>
-                    <th>Key</th>
-                    <th>Value</th>
-                    <th>Description</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(param, index) in params" :key="index">
-                    <td>
-                      <n-checkbox> </n-checkbox>
-                    </td>
-                    <td>
-                      <input
-                        class="border-none"
-                        placeholder="Key"
-                        type="text"
-                        v-model="param.key"
-                        @input="handleInput(index)"
-                      />
-                    </td>
-                    <td>
-                      <input
-                        placeholder="Value"
-                        class="border-none"
-                        type="text"
-                        v-model="param.value"
-                        @input="handleInput(index)"
-                      />
-                    </td>
-                    <td class="flex">
-                      <input
-                        placeholder="Description"
-                        class="border-none"
-                        type="text"
-                        v-model="param.description"
-                        @input="handleInput(index)"
-                      />
-                      <button @click="removeParam(index)">X</button>
-                    </td>
-                  </tr>
-                </tbody>
-              </n-table>
+              <n-data-table
+                :columns="columnsParams"
+                :data="dataParams"
+                :pagination="paginationParams"
+                :row-key="rowKey"
+                @update:checked-row-keys="checkActive"
+                class="text-xs"
+              />
             </n-tab-pane>
 
-            <!-- --------------------------Headers------------------------- -->
+            <!-- --------------------------------------------Headers------------------------------------------- -->
             <n-tab-pane name="Headers" tab="Headers">
               <div class="flex w-100 mb-4">
                 <p class="mr-3">Header</p>
@@ -162,7 +128,7 @@
                 class="text-xs"
               />
             </n-tab-pane>
-            <!-- ----- --------------------Body---------------------------- -->
+            <!-- ----- -----------------------------------------------Body------------------------------------------------------ -->
             <n-tab-pane name="Body" tab="Body" class="">
               <div class="flex items-center mb-10px">
                 <n-space vertical class="Raw w-20%">
@@ -172,17 +138,21 @@
                   <n-select v-model:value="value2" :options="optionsJson" />
                 </n-space>
               </div>
-              <input type="text" v-model="bodyData" />
+              <textarea
+                ref="input"
+                v-model="bodyData"
+                @keyup.enter.prevent="submitInput"
+              ></textarea>
               <!-- <pre>{{ JSON.stringify(value, null, 2) }}</pre> -->
-              <div>{{ pageBody }}</div>
+              <!-- <div>{{ bodyData }}</div> -->
             </n-tab-pane>
           </n-tabs>
-          <!-- <div class="text-green">Cookie</div> -->
+        
         </n-card>
-        <!-- ------------------------Response--------------------------------- -->
+        <!-- ------------------------------------------------------Response-------------------------------------------------------- -->
         <div class="Response p-4 w-400px min-h-screen">
           <p>Response</p>
-          <pre>{{ JSON.stringify(receivedData, null, 2) }}</pre>
+          <pre>{{ JSON.stringify(responseData, null, 2) }}</pre>
         </div>
       </div>
     </div>
@@ -194,23 +164,20 @@ import { h, defineComponent } from "vue"; //data-table
 import { NButton, useMessage } from "naive-ui"; ////data-table
 import axios from "axios";
 import { ref, watchEffect } from "vue";
-
-// const add = (inputKeyparams, inputValueparams) => {
-//   inputData.value = inputData.value + inputKeyparams + inputValueparams;
-// };
+import { NInput } from "naive-ui";
 
 const value2 = ref(2);
 const value1 = ref(1);
 const bodyData = ref();
 const inputData = ref("https://6406b120862956433e575082.mockapi.io/comment"); // lưu trữ phần tử của input và được sử dụng để gọi hàm useFetch() để tải dữ liệu từ API
 const selectRef = ref(1);
-const receivedData = ref(null); // lưu trữ dữ liệu nhận được từ API.Dữ liệu này sẽ được hiển thị trên màn hình để người dùng có thể xem
+const responseData = ref(null); // lưu trữ dữ liệu nhận được từ API.Dữ liệu này sẽ được hiển thị trên màn hình để người dùng có thể xem
 // const getApi = async () => {
-//   //hàm này được sử dụng để gọi hàm useFetch() để tải dữ liệu từ API. Sau đó, dữ liệu nhận được từ API sẽ được lưu trữ trong biến receivedData, và được hiển thị trên màn hình để người dùng có thể xem.
+//   //hàm này được sử dụng để gọi hàm useFetch() để tải dữ liệu từ API. Sau đó, dữ liệu nhận được từ API sẽ được lưu trữ trong biến responseData, và được hiển thị trên màn hình để người dùng có thể xem.
 //   const { data: test } = await useFetch(inputData.value);
 //   console.log(test);
 
-//   receivedData.value = JSON.stringify(test.value, undefined, 2);
+//   responseData.value = JSON.stringify(test.value, undefined, 2);
 // };
 
 // -----------------------hidden--------------------------
@@ -271,12 +238,13 @@ const getApi = (params) => {
 };
 
 const handleGet = async () => {
-  const { data, error, pending, refresh } = await useFetch(inputData.value, {
-    method: "GET",
-  });
-  receivedData.value = data.value;
-  console.log("🚀 ~ file: detail.vue:365 ~ handleGet ~ x:", data);
-  console.log("🚀 ~ file: detail.vue:356 ~ handleGet ~ refresh:", refresh);
+  try {
+    const response = await axios.get(inputData.value);
+    responseData.value = response.data;
+    console.log("🚀 ~ file: detail.vue:365 ~ handleGet ~ x:", response.data);
+  } catch (error) {
+    console.error(error);
+  }
 };
 // ---------------------POST-----------------------
 const handlePost = async () => {
@@ -285,7 +253,7 @@ const handlePost = async () => {
       inputData.value,
       bodyData.value ? JSON.parse(bodyData.value) : null // nếu điều kiện về thứ nhất đúng sẽ lấy gtri vế t2-toán tử 3 ngôi
     ); //trả ra null ở bodyData chứ ko phải response
-    receivedData.value = response.data;
+    responseData.value = response.data;
     console.log(
       "🚀 ~ file: detail.vue:373 ~ handlePost ~ data:",
       response.data
@@ -295,7 +263,7 @@ const handlePost = async () => {
   }
 };
 
-// --------------sử dụng axios--------------------
+// --------------------------sử dụng axios-----------------------------
 // const handlePost = async () => {
 //   const { data, error, pending, refresh } = await useFetch(inputData.value, {
 //     method: "POST",
@@ -303,17 +271,17 @@ const handlePost = async () => {
 //     body: JSON.parse(bodyData.value),
 //   });
 
-//   receivedData.value = data.value;
+//   responseData.value = data.value;
 //   console.log("🚀 ~ file: detail.vue:373 ~ handlePost ~ data:", data.value);
 // };
-// ------------------------PUT-------------------
+// --------------------------------------PUT---------------------------------
 const handlePut = async () => {
   try {
     const response = await axios.put(
       inputData.value,
       JSON.parse(bodyData.value)
     );
-    receivedData.value = response.data;
+    responseData.value = response.data;
     console.log(
       "🚀 ~ file: detail.vue:373 ~ handlePost ~ data:",
       response.data
@@ -327,7 +295,7 @@ const handlePut = async () => {
 const handleDelete = async () => {
   try {
     const response = await axios.delete(inputData.value);
-    receivedData.value = response.data;
+    responseData.value = response.data;
     console.log(response.data);
   } catch (error) {
     console.log(error);
@@ -335,7 +303,7 @@ const handleDelete = async () => {
   // const { data, error, pending, refresh } = await useFetch(inputData.value, {
   //   method: "DELETE",
   // });
-  // receivedData.value = data.value;
+  // responseData.value = data.value;
   // console.log("🚀 ~ file: detail.vue:373 ~ handleDelete ~ data:", data);
 };
 // -----------------------------Header--------------------
@@ -385,44 +353,147 @@ const optionsJson = [
 
 //-------------------Params------------
 
-const params = ref([{ key: "", value: "", description: "" }]);
+const rowKey = (row) => {
+  return row.id;
+};
 
-function handleInput(index) {
-  if (index === params.value.length - 1) {
-    params.value.push({ key: "", value: "", description: "" });
-  }
-}
+const dataParams = ref([
+  {
+    id: 0,
+    key: "",
+    value: "",
+    description: "",
+  },
+  {
+    id: 1,
+    key: "",
+    value: "",
+    description: "",
+  },
+]);
 
-function removeParam(index) {
-  params.value.splice(index, 1);
-}
+const columnsParams = [
+  {
+    type: "selection",
+  },
+  {
+    title: "Key",
+    key: "key",
+    render(row, index) {
+      console.log(row);
+      return h(NInput, {
+        value: row.key,
+        onUpdateValue(v) {
+          dataParams.value[index].key = v;
+        },
+        onInput() {
+          // Thêm một dòng mới vào mảng data nếu ô input cuối cùng có giá trị khác rỗng
+          const lastIndex = dataParams.value.length - 1;
+          if (
+            dataParams.value[lastIndex].key !== "" ||
+            dataParams.value[lastIndex].value !== "" ||
+            dataParams.value[lastIndex].description !== ""
+          ) {
+            dataParams.value.push({
+              id: lastIndex + 1,
+              key: "",
+              value: "",
+              description: "",
+            });
+          }
+        },
+      });
+    },
+  },
+  {
+    title: "Value",
+    key: "value",
+    render(row, index) {
+      return h(NInput, {
+        value: row.age,
+        onUpdateValue(v) {
+          dataParams.value[index].value = v;
+        },
+        onInput() {
+          // Thêm một dòng mới vào mảng data nếu ô input cuối cùng có giá trị khác rỗng
+          const lastIndex = dataParams.value.length - 1;
+          if (
+            dataParams.value[lastIndex].key !== "" ||
+            dataParams.value[lastIndex].value !== "" ||
+            dataParams.value[lastIndex].description !== ""
+          ) {
+            dataParams.value.push({
+              id: lastIndex + 1,
+              key: "",
+              value: "",
+              description: "",
+            });
+          }
+        },
+      });
+    },
+  },
+  {
+    title: "Description",
+    key: "description",
+    render(row, index) {
+      return h(NInput, {
+        value: row.address,
+        onUpdateValue(v) {
+          dataParams.value[index].description = v;
+        },
+        onInput() {
+          // Thêm một dòng mới vào mảng data nếu ô input cuối cùng có giá trị khác rỗng
+          const lastIndex = dataParams.value.length - 1;
+          if (
+            dataParams.value[lastIndex].key !== "" ||
+            dataParams.value[lastIndex].value !== "" ||
+            dataParams.value[lastIndex].description !== ""
+          ) {
+            dataParams.value.push({
+              id: lastIndex + 1,
+              key: "",
+              value: "",
+              description: "",
+            });
+          }
+        },
+      });
+    },
+  },
+  {
+    title: "",
+    key: "value",
+    render(row, index) {
+      return h("div", [
+        h(
+          "button",
+          {
+            onClick() {
+              dataParams.value.splice(index, 1);
+            },
+          },
+          "X"
+        ),
+      ]);
+    },
+  },
+];
 
-watchEffect(() => {
-  const lastParam = params.value[params.value.length - 1];
-  if (lastParam.key || lastParam.value || lastParam.description) {
-    params.value.push({ key: "", value: "", description: "" });
-  }
+const paginationParams = () => ({
+  pageSize: 10,
 });
-// const columnsParams = [
-//   {
-//     title: "Key",
-//     key: "no",
-//   },
-//   {
-//     title: "Value",
-//     key: "title",
-//   },
-//   {
-//     title: "Description",
-//     key: "length",
-//   },
-//   {
-//     title: "...",
-//     key: "actions",
-//   },
-//   {
-//     title: "Bulk Edit",
-//     key: "length",
-//   },
-// ];
+
+const checkActive = (keys) => {
+  if (keys.length > 0) {
+    let params = "";
+    keys.forEach((key) => {
+      let x = dataParams.value[key];
+      params += `${x.key}=${x.value}&`;
+    });
+    inputData.value = `?${params.slice(0, -1)}`;
+  } else {
+    inputData.value = "";
+  }
+};
 </script>

@@ -1,10 +1,10 @@
 <template>
   <!-- ------------------------------------------Page--------------------------------------------------- -->
-  <div class="content bg-white w-700 p-5 pt-2 pb-2">
+  <div class="content bg-white w-700 pr-5 pl-5  pb-2">
     <div>
-      <div class="layout-header flex justify-between">
-        <div class="">
-          <p>New Collection</p>
+      <div class="layout-header flex justify-between p-2">
+        <div >
+          <p >New Collection</p>
         </div>
         <div class="mr-5">
           <nav>

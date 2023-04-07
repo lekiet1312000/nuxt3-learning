@@ -2,11 +2,11 @@
   <!-- -wp-content-- -->
   <div class="flex ">
     <!-- ----------Sidebar------- -->
-    <div class="bg-#F5F5F5 min-h-screen w-25% p-2">
+    <div class="bg-#F5F5F5 min-h-screen max-w-screen ">
       <!-- ----header-sb---------- -->
-      <div class="flex">
-        <button class="h-27px border-none bg-#f5f5f5" @click="addCollection">
-          <div class="i-mdi:plus text-xl"></div>
+      <div class="flex pt-2 pb-2 pr-1 pl-1">
+        <button class=" p-0  border-none bg-#f5f5f5" @click="addCollection">
+          <div class="i-mdi:plus text-xl pr-1"></div>
         </button>
 
         <form action="" id="search" class="relative">
@@ -16,8 +16,8 @@
           </div>
         </form>
 
-        <button class="w-7 h-26px border-none bg-#f5f5f5">
-          <div class="i-mdi:dots-horizontal text-xl"></div>
+        <button class="p-0  border-none bg-#f5f5f5">
+          <div class="i-mdi:dots-horizontal text-xl pl-1"></div>
         </button>
       </div>
       <!-- -----------------------------------content-sb-------------------------------------------- -->
@@ -32,15 +32,15 @@
           v-for="(i, index) in items"
           :key="index"
         >
-          <n-collapse-item title="New Collection" name="">
+          <n-collapse-item title="New Collection" name="" class="p-0">
             <n-collapse-item
               :title="x.title"
               v-for="(x, index) in i.data"
               :key="index"
             >
-            <nuxt-link to="/detail" class="flex space-x-2 decoration-none">
-            <p class="text-green text-lg">Get</p>
-            <p>NewReques</p>
+            <nuxt-link to="/detail" class="flex space-x-2 decoration-none ">
+            <p class="text-green text-lg m-0">Get</p>
+            <p class="mt-0 mb-0 ">NewReques</p>
             </nuxt-link>
               <!-- <div
                 :title="x.title"

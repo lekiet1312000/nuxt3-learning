@@ -1,54 +1,168 @@
 <template>
   <div>
-    <input
-      :input-props="{ type: 'url' }"
-      placeholder="Enter URL or paste text"
-      v-model="inputData"
-      class="w-50%"
+    <n-input v-model:value="inputParams" class="my-5" />
+    <n-data-table
+      :columns="columns"
+      :data="data"
+      :pagination="pagination"
+      :row-key="rowKey"
+      @update:checked-row-keys="checkActive"
     />
-    <div v-for="(param, index) in params" :key="index">
-      <n-checkbox></n-checkbox>
-      <input v-model="param.key" @input="handleInput(index)" />
-      <input v-model="param.value" @input="handleInput(index)" />
-      <input v-model="param.description" @input="handleInput(index)" />
-      <button @click="removeParam(index)">Remove</button>
-    </div>
-    <div></div>
   </div>
+  <pre>{{ JSON.stringify(data, null, 2) }}</pre>
 </template>
 
 <script setup>
-import { ref, watchEffect } from "vue";
+import { NInput } from "naive-ui";
+import axios from "axios";
 
-const params = ref([{ key: "", value: "", description: "" }]);
-const inputData = ref("http://google.com");
+const rowKey = (row) => {
+  return row.id;
+};
 
-function handleInput(index) {
-  if (index === params.value.length - 1) {
-    params.value.push({ key: "", value: "", description: "" });
-  }
-}
+const data = ref([]);
 
-function removeParam(index) {
-  params.value.splice(index, 1);
-}
+const inputParams = ref("https://642541e49e0a30d92b2ccf2a.mockapi.io/comment");
 
-function updateInputData() {
-  let result = "";
-  for (let i = 0; i < params.value.length; i++) {
-    const param = params.value[i];
-    if (param.key && param.value) {
-      result += `${param.key}=${param.value}&`;
-    }
-  }
-  if (result.length > 0) {
-    result = "?" + result.slice(0, -1);
-  }
-  inputData.value = "http://google.com" + result;
-}
+const columns = [
+  {
+    type: "selection",
+  },
+  {
+    title: "Key",
+    key: "key",
+    render(row, index) {
+      console.log(row);
+      return h(NInput, {
+        value: row.key,
+        onUpdateValue(v) {
+          data.value[index].key = v;
+        },
+        onInput() {
+          // Thêm một dòng mới vào mảng data nếu ô input cuối cùng có giá trị khác rỗng
+          const lastIndex = data.value.length - 1;
+          if (
+            data.value[lastIndex].key !== "" ||
+            data.value[lastIndex].value !== "" ||
+            data.value[lastIndex].description !== ""
+          ) {
+            data.value.push({
+              id: lastIndex + 1,
+              key: "",
+              value: "",
+              description: "",
+            });
+          }
+        },
+      });
+    },
+  },
+  {
+    title: "Value",
+    key: "value",
+    render(row, index) {
+      return h(NInput, {
+        value: row.age,
+        onUpdateValue(v) {
+          data.value[index].value = v;
+        },
+        onInput() {
+          // Thêm một dòng mới vào mảng data nếu ô input cuối cùng có giá trị khác rỗng
+          const lastIndex = data.value.length - 1;
+          if (
+            data.value[lastIndex].key !== "" ||
+            data.value[lastIndex].value !== "" ||
+            data.value[lastIndex].description !== ""
+          ) {
+            data.value.push({
+              id: lastIndex + 1,
+              key: "",
+              value: "",
+              description: "",
+            });
+          }
+        },
+      });
+    },
+  },
+  {
+    title: "Description",
+    key: "description",
+    render(row, index) {
+      return h(NInput, {
+        value: row.address,
+        onUpdateValue(v) {
+          data.value[index].description = v;
+        },
+        onInput() {
+          // Thêm một dòng mới vào mảng data nếu ô input cuối cùng có giá trị khác rỗng
+          const lastIndex = data.value.length - 1;
+          if (
+            data.value[lastIndex].key !== "" ||
+            data.value[lastIndex].value !== "" ||
+            data.value[lastIndex].description !== ""
+          ) {
+            data.value.push({
+              id: lastIndex + 1,
+              key: "",
+              value: "",
+              description: "",
+            });
+          }
+        },
+      });
+    },
+  },
+  {
+    title: "Value",
+    key: "value",
+    render(row, index) {
+      return h("div", [
+        h(
+          "button",
+          {
+            onClick() {
+              data.value.splice(index, 1);
+            },
+          },
+          "Delete"
+        ),
+      ]);
+    },
+  },
+];
 
-watchEffect(() => {
-  updateInputData();
+const pagination = () => ({
+  pageSize: 10,
 });
 
+const checkActive = (keys) => {
+  if (keys.length > 0) {
+    let params = "";
+    keys.forEach((key) => {
+      let x = data.value[key];
+      params += `${x.key}=${x.value}&`;
+    });
+    inputParams.value = `${inputParams.value}?${params.slice(0, -1)}`;
+  } else {
+    inputParams.value = "https://642541e49e0a30d92b2ccf2a.mockapi.io/comment";
+  }
+};
+
+watchEffect(() => {
+  axios
+    .get(inputParams.value)
+    .then((response) => {
+      const apiData = response.data;
+      data.value = apiData.slice(0, 2).map((item) => ({
+        id: item.id,
+        key: item.key,
+        value: item.value,
+        description: item.description,
+      }));
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+});
 </script>
