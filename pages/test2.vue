@@ -1,15 +1,13 @@
 <template>
   <div>
-    <n-input v-model:value="inputParams" class="my-5" />
+    <n-input v-model:value="inputData" class="my-5" />
     <n-data-table
-      :columns="columns"
-      :data="data"
-      :pagination="pagination"
+      :columns="columnsParams"
+      :data="dataParams"
       :row-key="rowKey"
       @update:checked-row-keys="checkActive"
     />
   </div>
-  <!-- <pre>{{ JSON.stringify(data, null, 2) }}</pre> -->
 </template>
 
 <script setup>
@@ -19,7 +17,7 @@ const rowKey = (row) => {
   return row.id;
 };
 
-const data = ref([
+const dataParams = ref([
   {
     id: 0,
     key: "",
@@ -34,9 +32,9 @@ const data = ref([
   },
 ]);
 
-const inputParams = ref("https://642541e49e0a30d92b2ccf2a.mockapi.io/comment");
+const inputData = ref("");
 
-const columns = [
+const columnsParams = [
   {
     type: "selection",
   },
@@ -48,17 +46,17 @@ const columns = [
       return h(NInput, {
         value: row.key,
         onUpdateValue(v) {
-          data.value[index].key = v;
+          dataParams.value[index].key = v;
         },
         onInput() {
           // Thêm một dòng mới vào mảng data nếu ô input cuối cùng có giá trị khác rỗng
-          const lastIndex = data.value.length - 1;
+          const lastIndex = dataParams.value.length - 1;
           if (
-            data.value[lastIndex].key !== "" ||
-            data.value[lastIndex].value !== "" ||
-            data.value[lastIndex].description !== ""
+            dataParams.value[lastIndex].key !== "" ||
+            dataParams.value[lastIndex].value !== "" ||
+            dataParams.value[lastIndex].description !== ""
           ) {
-            data.value.push({
+            dataParams.value.push({
               id: lastIndex + 1,
               key: "",
               value: "",
@@ -76,17 +74,17 @@ const columns = [
       return h(NInput, {
         value: row.age,
         onUpdateValue(v) {
-          data.value[index].value = v;
+          dataParams.value[index].value = v;
         },
         onInput() {
           // Thêm một dòng mới vào mảng data nếu ô input cuối cùng có giá trị khác rỗng
-          const lastIndex = data.value.length - 1;
+          const lastIndex = dataParams.value.length - 1;
           if (
-            data.value[lastIndex].key !== "" ||
-            data.value[lastIndex].value !== "" ||
-            data.value[lastIndex].description !== ""
+            dataParams.value[lastIndex].key !== "" ||
+            dataParams.value[lastIndex].value !== "" ||
+            dataParams.value[lastIndex].description !== ""
           ) {
-            data.value.push({
+            dataParams.value.push({
               id: lastIndex + 1,
               key: "",
               value: "",
@@ -104,17 +102,17 @@ const columns = [
       return h(NInput, {
         value: row.address,
         onUpdateValue(v) {
-          data.value[index].description = v;
+          dataParams.value[index].description = v;
         },
         onInput() {
           // Thêm một dòng mới vào mảng data nếu ô input cuối cùng có giá trị khác rỗng
-          const lastIndex = data.value.length - 1;
+          const lastIndex = dataParams.value.length - 1;
           if (
-            data.value[lastIndex].key !== "" ||
-            data.value[lastIndex].value !== "" ||
-            data.value[lastIndex].description !== ""
+            dataParams.value[lastIndex].key !== "" ||
+            dataParams.value[lastIndex].value !== "" ||
+            dataParams.value[lastIndex].description !== ""
           ) {
-            data.value.push({
+            dataParams.value.push({
               id: lastIndex + 1,
               key: "",
               value: "",
@@ -126,39 +124,72 @@ const columns = [
     },
   },
   {
-    title: "Value",
+    title: "",
     key: "value",
     render(row, index) {
       return h("div", [
-       
         h(
           "button",
           {
             onClick() {
-              data.value.splice(index, 1);
+              deleteRow(index);
             },
           },
-          "Delete"
+          "delete"
         ),
       ]);
     },
   },
 ];
 
-const pagination = () => ({
-  pageSize: 10,
-});
+// ----------------------------------------cachs2---------------------
+const getRowIdByKey = (key) => {
+  const row = dataParams.value.find((row) => row.key === key);
+  return row ? row.id : null;
+};
+const checkActive = (checkedRowKeys) => {
+  let url;
+  try {
+    url = new URL(inputData.value);
+  } catch (error) {
+    console.log("Invalid URL:", inputData.value);
+    return;
+  }
 
-const checkActive = (keys) => {
-  if (keys.length > 0) {
-    let params = "";
-    keys.forEach((key) => {
-      let x = data.value[key];
-      params += `${x.key}=${x.value}&`;
-    });
-    inputParams.value = `${inputParams.value}?${params.slice(0, -1)}`;
-  } else {
-    inputParams.value = "https://642541e49e0a30d92b2ccf2a.mockapi.io/comment";
+  const searchParams = url.searchParams;
+
+  //Xóa các cặp key-value được thêm vào URL bởi checkActive
+  [...searchParams.keys()]
+    .filter((key) => !checkedRowKeys.includes(getRowIdByKey(key)))
+    .forEach((key) => searchParams.delete(key));
+
+  // Thêm các cặp key-value vào URL
+  const newParams = dataParams.value
+    .filter((row) => checkedRowKeys.includes(row.id))
+    .map((row) => `${row.key}=${row.value}`)
+    .join("&");
+
+  // Thay đổi query parameter trên URL và lưu vào inputParams
+  url.search = newParams;
+  inputData.value = url.href;
+};
+const deleteRow = (index) => {
+  const deletedRow = dataParams.value.splice(index, 1)[0];
+
+  // Xóa các query parameter tương ứng khỏi URL
+  let url;
+  try {
+    url = new URL(inputData.value);
+  } catch (error) {
+    console.log("Invalid URL:", inputData.value);
+    return;
+  }
+
+  const searchParams = url.searchParams;
+  if (searchParams.has(deletedRow.key)) {
+    searchParams.delete(deletedRow.key);
+    // Cập nhật lại giá trị của ô input
+    inputData.value = url.href;
   }
 };
 </script>

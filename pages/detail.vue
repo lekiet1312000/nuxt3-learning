@@ -1,43 +1,41 @@
 <template>
-
   <div class="content bg-white p-5 pt-2 pb-2 min-h-screen w-75%">
-  <!-- -----------------------------------------HEADER-------------------------------------------- -->
+    <!-- -----------------------------------------HEADER-------------------------------------------- -->
     <div class="layout-header flex justify-between">
       <div class="flex">
         <div>
           <Nuxt-link to="/" class="decoration-none text-gray">
-            <p>New Collection</p>
+            <p class="font-500">New Collection</p>
           </Nuxt-link>
         </div>
         <p class="text-gray pr-2 pl-2">/</p>
         <div class="text-gray">
-          <p>New Folder</p>
+          <p class="font-500">New Folder</p>
         </div>
         <p class="text-gray pr-2 pl-2">/</p>
-        <div class="">
-          <p>New Request</p>
+        <div>
+          <p class="font-500">New Request</p>
         </div>
       </div>
-      <div class="mr-5">
+      <div class="mr-5 ">
         <nav>
-          <ul class="flex list-none">
+          <ul class="flex list-none items-center">
             <li class="ml-5 flex">
               <n-button class="bg-gray-1">
-                <div class="i-mdi:content-save text-xl mr-1"></div>
+                <div class="i-mdi:content-save text-xl mr-1 text-gray-4"></div>
                 <p>Save</p>
               </n-button>
               <n-button class="p-0 bg-gray-1">
                 <div class="i-mdi:chevron-down text-xl"></div>
               </n-button>
             </li>
-            <li class="ml-5 items-center">
+            <li class="ml-5">
               <n-button class="i-mdi:dots-horizontal text-xl"></n-button>
             </li>
-            <li class="ml-5 flex items-center bg-gray-1 p-1">
+            <li class="ml-5 flex items-center bg-gray-1 p-1 b-rounded-2">
               <div class="bg-white p-1">
                 <div class="i-mdi:pencil-outline text-orange"></div>
               </div>
-
               <n-button
                 class="i-mdi:message-text-outline bg-gray-300"
               ></n-button>
@@ -48,25 +46,32 @@
     </div>
     <!-- ---------------------------------------------INPUT-SEND-METHOD-------------------------------------------- -->
     <hr />
-    <div class="box menu flex">
-      <div class="relative w-20%">
-        <n-space vertical>
-          <n-select v-model:value="selectRef" :options="options" />
-        </n-space>
+
+    <div class="box menu">
+      <div class="flex w-100%">
+        <div class="relative w-17%">
+          <n-space vertical>
+            <n-select v-model:value="selectRef" :options="options" />
+          </n-space>
+        </div>
+        <div class="w-70%">
+          <n-input
+            :input-props="{ type: 'url' }"
+            placeholder="Enter URL or paste text"
+            v-model:value="inputData"
+            class="bg-gray-1"
+          />
+        </div>
+
+        <div class="w-13% flex ml-7px ">
+          <n-button class="w-75%" type="info" @click="getApi"> Send </n-button>
+          <n-button class="p-0" type="info">
+            <div class="i-mdi:chevron-down text-xl"></div>
+          </n-button>
+        </div>
       </div>
-
-      <input
-        class="w-70%"
-        :input-props="{ type: 'url' }"
-        placeholder="Enter URL or paste text"
-        v-model="inputData"
-      />
-
-      <n-button class="w-10% p-0" type="info" @click="getApi">
-        Send
-        <!-- <div class="i-mdi:chevron-down text-xl w-4%"></div> -->
-      </n-button>
     </div>
+    <hr>
     <!-- ----------------------------------------------------------------CONTENT--------------------------------------------------------------- -->
     <div class="layout content">
       <div class="box content flex w-850px">
@@ -78,7 +83,6 @@
               <n-data-table
                 :columns="columnsParams"
                 :data="dataParams"
-                :pagination="paginationParams"
                 :row-key="rowKey"
                 @update:checked-row-keys="checkActive"
                 class="text-xs"
@@ -87,27 +91,37 @@
 
             <!-- --------------------------------------------Headers------------------------------------------- -->
             <n-tab-pane name="Headers" tab="Headers">
-              <div class="flex w-100 mb-4">
-                <p class="mr-3">Header</p>
-                <div
-                  class="bg-gray-1 border-none cursor-pointer flex items-center"
-                  @click="toggleContent"
-                  v-if="showContent"
-                >
-                  <div class="i-mdi:eye-arrow-right-outline text-xl mr-1"></div>
-
-                  <div class="text-xs">display</div>
-                  <!-- Hide auto-generated headers -->
+              <div class="flex w-100 mb-4 items-center">
+                <div>
+                  <p class="mr-3">Header</p>
                 </div>
+                <div >
+                  <div
+                    class="bg-gray-1 border-none cursor-pointer flex b-rounded-3  h-20px p1 items-center"
+                    @click="toggleContent"
+                    v-if="showContent"
+                  >
+                    <div
+                      class="i-mdi:eye-arrow-right-outline text-xl mr-1 text-gray-5"
+                    ></div>
 
-                <div
-                  class="bg-gray-1 border-none cursor-pointer flex items-center"
-                  @click="toggleContent"
-                  v-if="!showContent"
-                >
-                  <div class="i-mdi:eye-arrow-right-outline text-xl mr-1"></div>
-                  <p class="mr-1">0</p>
-                  <div class="text-xs">hidden</div>
+                    <div class="text-xs font-500 text-gray-5">
+                      Hide auto-generated headers
+                    </div>
+                    <!-- Hide auto-generated headers -->
+                  </div>
+
+                  <div
+                    class="bg-gray-1 border-none cursor-pointer flex items-center b-rounded-3 h-20px p1"
+                    @click="toggleContent"
+                    v-if="!showContent"
+                  >
+                    <div
+                      class="i-mdi:eye-arrow-right-outline text-xl mr-1"
+                    ></div>
+                    <p class="mr-1">0</p>
+                    <div class="text-xs text-gray-5">hidden</div>
+                  </div>
                 </div>
               </div>
               <!-- v-if để check xem componet có được hiển thị hay không nếu là true hiển thị flash thì không -->
@@ -147,11 +161,13 @@
               <!-- <div>{{ bodyData }}</div> -->
             </n-tab-pane>
           </n-tabs>
-        
         </n-card>
         <!-- ------------------------------------------------------Response-------------------------------------------------------- -->
-        <div class="Response p-4 w-400px min-h-screen">
+        <div class="Response p-4 w-400px min-h-screen box-border border border-black " >
           <p>Response</p>
+          <!-- <div v-if="errorMsg">
+            <p>{{ errorMsg }}</p>
+          </div> -->
           <pre>{{ JSON.stringify(responseData, null, 2) }}</pre>
         </div>
       </div>
@@ -166,12 +182,13 @@ import axios from "axios";
 import { ref, watchEffect } from "vue";
 import { NInput } from "naive-ui";
 
+// let errorMsg = ref();
 const value2 = ref(2);
 const value1 = ref(1);
 const bodyData = ref();
-const inputData = ref("https://6406b120862956433e575082.mockapi.io/comment"); // lưu trữ phần tử của input và được sử dụng để gọi hàm useFetch() để tải dữ liệu từ API
+const inputData = ref(""); // lưu trữ phần tử của input và được sử dụng để gọi hàm useFetch() để tải dữ liệu từ API
 const selectRef = ref(1);
-const responseData = ref(null); // lưu trữ dữ liệu nhận được từ API.Dữ liệu này sẽ được hiển thị trên màn hình để người dùng có thể xem
+const responseData = ref(); // lưu trữ dữ liệu nhận được từ API.Dữ liệu này sẽ được hiển thị trên màn hình để người dùng có thể xem
 // const getApi = async () => {
 //   //hàm này được sử dụng để gọi hàm useFetch() để tải dữ liệu từ API. Sau đó, dữ liệu nhận được từ API sẽ được lưu trữ trong biến responseData, và được hiển thị trên màn hình để người dùng có thể xem.
 //   const { data: test } = await useFetch(inputData.value);
@@ -211,6 +228,14 @@ const options = [
 ];
 
 const getApi = (params) => {
+  // if (!isValidUrl(inputData.value)) {
+  //   console.log(isValidUrl);
+  //   errorMsg.value = "URL không đúng định dạng";
+  //   responseData.value = null;
+  //   return;
+  // } else {
+  //   errorMsg.value = null;
+  // }
   switch (selectRef.value) {
     case 1:
       console.log("get"); // case =1 =1 thì là GET
@@ -351,7 +376,7 @@ const optionsJson = [
   },
 ];
 
-//-------------------Params------------
+//--------------------Params--------------------------
 
 const rowKey = (row) => {
   return row.id;
@@ -470,7 +495,7 @@ const columnsParams = [
           "button",
           {
             onClick() {
-              dataParams.value.splice(index, 1);
+              deleteRow(index);
             },
           },
           "X"
@@ -480,20 +505,56 @@ const columnsParams = [
   },
 ];
 
-const paginationParams = () => ({
-  pageSize: 10,
-});
+const getRowIdByKey = (key) => {
+  const row = dataParams.value.find((row) => row.key === key);
+  return row ? row.id : null;
+};
+const checkActive = (checkedRowKeys) => {
+  let url;
+  try {
+    url = new URL(inputData.value);
+  } catch (error) {
+    console.log("Invalid URL:", inputData.value);
+    return;
+  }
 
-const checkActive = (keys) => {
-  if (keys.length > 0) {
-    let params = "";
-    keys.forEach((key) => {
-      let x = dataParams.value[key];
-      params += `${x.key}=${x.value}&`;
-    });
-    inputData.value = `?${params.slice(0, -1)}`;
-  } else {
-    inputData.value = "";
+  const searchParams = url.searchParams;
+
+  //Xóa các cặp key-value được thêm vào URL bởi checkActive
+  [...searchParams.keys()] //...được sử dụng để bóc tách một mảng hoặc một đối tượng thành các phần tử riêng lẻ
+    .filter((key) => !checkedRowKeys.includes(getRowIdByKey(key)))
+    .forEach((key) => searchParams.delete(key));
+
+  // Thêm các cặp key-value vào URL
+  const newParams = dataParams.value
+    .filter((row) => checkedRowKeys.includes(row.id))
+    .map((row) => `${row.key}=${row.value}`)
+    .join("&");
+
+  // Thay đổi query parameter trên URL và lưu vào inputParams
+  url.search = newParams;
+  inputData.value = url.href;
+};
+
+// Xóa các query parameter tương ứng khỏi URL
+const deleteRow = (index) => {
+  const deletedRow = dataParams.value.splice(index, 1)[0];
+  let url;
+  try {
+    url = new URL(inputData.value);
+  } catch (error) {
+    console.log("Invalid URL:", inputData.value);
+    return;
+  }
+
+  const searchParams = url.searchParams;
+  if (searchParams.has(deletedRow.key)) {
+    searchParams.delete(deletedRow.key);
+    inputData.value = url.href;
   }
 };
+// function isValidUrl(url) {
+//   const urlPattern = /^(http|https):\/\/[^\s/$.?#].[^\s]*$/i;
+//   return urlPattern.test(url);
+// }
 </script>
