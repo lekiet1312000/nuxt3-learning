@@ -1,8 +1,8 @@
 <template>
-  <div class="content bg-white p-5 pt-2 pb-2 min-h-screen w-75%">
+  <div class="content text-4 bg-white p-5 pt-1 pb-1 min-h-screen w-1200px">
     <!-- -----------------------------------------HEADER-------------------------------------------- -->
     <div class="layout-header flex justify-between">
-      <div class="flex">
+      <div class="flex ml-4">
         <div>
           <Nuxt-link to="/" class="decoration-none text-gray">
             <p class="font-500">New Collection</p>
@@ -17,7 +17,7 @@
           <p class="font-500">New Request</p>
         </div>
       </div>
-      <div class="mr-5 ">
+      <div class="mr-4">
         <nav>
           <ul class="flex list-none items-center">
             <li class="ml-5 flex">
@@ -25,14 +25,17 @@
                 <div class="i-mdi:content-save text-xl mr-1 text-gray-4"></div>
                 <p>Save</p>
               </n-button>
-              <n-button class="p-0 bg-gray-1">
+              <n-button class="p-0 bg-gray-2">
                 <div class="i-mdi:chevron-down text-xl"></div>
               </n-button>
             </li>
             <li class="ml-5">
-              <n-button class="i-mdi:dots-horizontal text-xl"></n-button>
+              <n-button class="i-mdi:dots-horizontal text-xl p-3"></n-button>
             </li>
-            <li class="ml-5 flex items-center bg-gray-1 p-1 b-rounded-2">
+            <li>
+              <div class="h-7 w-px bg-gray-400 mx-4"></div>
+            </li>
+            <li class="ml-5 flex items-center bg-gray-2 p-1 b-rounded-2">
               <div class="bg-white p-1">
                 <div class="i-mdi:pencil-outline text-orange"></div>
               </div>
@@ -44,48 +47,59 @@
         </nav>
       </div>
     </div>
+
     <!-- ---------------------------------------------INPUT-SEND-METHOD-------------------------------------------- -->
     <hr />
 
     <div class="box menu">
       <div class="flex w-100%">
-        <div class="relative w-17%">
+        <div class="relative w-15%">
           <n-space vertical>
-            <n-select v-model:value="selectRef" :options="options" />
+            <n-select
+              size="large"
+              v-model:value="selectRef"
+              :options="options"
+            />
           </n-space>
         </div>
-        <div class="w-70%">
+        <div class="w-75%">
           <n-input
             :input-props="{ type: 'url' }"
             placeholder="Enter URL or paste text"
             v-model:value="inputData"
-            class="bg-gray-1"
+            class="bg-gray-1 p-0.75"
           />
         </div>
 
-        <div class="w-13% flex ml-7px ">
-          <n-button class="w-75%" type="info" @click="getApi"> Send </n-button>
-          <n-button class="p-0" type="info">
-            <div class="i-mdi:chevron-down text-xl"></div>
-          </n-button>
+        <div
+          class="w-10% flex ml-7px text-white bg-#097BED border-rounded p-0.75"
+        >
+          <n-button class="w-70%" type="bg-#097BED" @click="getApi"
+            >Send</n-button
+          >
+          <div class="relative">
+            <n-button
+              class="i-mdi:chevron-down p-0 text-xl absolute top-5px left-6px border-none"
+            ></n-button>
+          </div>
         </div>
       </div>
     </div>
-    <hr>
+    <hr />
     <!-- ----------------------------------------------------------------CONTENT--------------------------------------------------------------- -->
-    <div class="layout content">
-      <div class="box content flex w-850px">
-        <n-card clas="w-450px min-h-screen">
+    <div class="layout content w-100%">
+      <div class="box content flex">
+        <n-card clas=" min-h-screen w-3/5 box-border ">
           <n-tabs type="line" animated class="">
             <!-- --------------------------Params------------------------- -->
-            <n-tab-pane name="Params" tab="Params">
+            <n-tab-pane name="Params" tab="Params" class="text-4">
               <p class="">Query Params</p>
               <n-data-table
                 :columns="columnsParams"
                 :data="dataParams"
                 :row-key="rowKey"
                 @update:checked-row-keys="checkActive"
-                class="text-xs"
+                class="text-4"
               />
             </n-tab-pane>
 
@@ -95,9 +109,9 @@
                 <div>
                   <p class="mr-3">Header</p>
                 </div>
-                <div >
+                <div>
                   <div
-                    class="bg-gray-1 border-none cursor-pointer flex b-rounded-3  h-20px p1 items-center"
+                    class="bg-gray-1 border-none cursor-pointer flex b-rounded-3 h-20px p1 items-center"
                     @click="toggleContent"
                     v-if="showContent"
                   >
@@ -131,7 +145,7 @@
                 :data="data"
                 :pagination="pagination"
                 :bordered="false"
-                class="text-xs"
+                class="text-4"
               />
 
               <n-data-table
@@ -163,12 +177,24 @@
           </n-tabs>
         </n-card>
         <!-- ------------------------------------------------------Response-------------------------------------------------------- -->
-        <div class="Response p-4 w-400px min-h-screen box-border border border-black " >
-          <p>Response</p>
-          <!-- <div v-if="errorMsg">
+        <div
+          class="Response pr-0.5 p-4 w-600px flex flex-col relative items-center"
+        >
+          <h3 class="text-gray-4 mr-70 mt-0">Response</h3>
+
+          <div class="overflow-auto max-h-550px">
+            <div v-if="loading" class="spinner absolute top-60"></div>
+            <div v-else>
+              <pre class="w-350px whitespace-pre-wrap pl-1 m-0">{{
+                JSON.stringify(responseData, null, 2)
+              }}</pre>
+            </div>
+          </div>
+
+          <!-- ----------------Lỗi Url------------------- -->
+          <div v-if="errorMsg">
             <p>{{ errorMsg }}</p>
-          </div> -->
-          <pre>{{ JSON.stringify(responseData, null, 2) }}</pre>
+          </div>
         </div>
       </div>
     </div>
@@ -182,11 +208,14 @@ import axios from "axios";
 import { ref, watchEffect } from "vue";
 import { NInput } from "naive-ui";
 
-// let errorMsg = ref();
+const loading = ref(false);
+const errorMsg = ref();
 const value2 = ref(2);
+
 const value1 = ref(1);
 const bodyData = ref();
 const inputData = ref(""); // lưu trữ phần tử của input và được sử dụng để gọi hàm useFetch() để tải dữ liệu từ API
+
 const selectRef = ref(1);
 const responseData = ref(); // lưu trữ dữ liệu nhận được từ API.Dữ liệu này sẽ được hiển thị trên màn hình để người dùng có thể xem
 // const getApi = async () => {
@@ -228,14 +257,22 @@ const options = [
 ];
 
 const getApi = (params) => {
-  // if (!isValidUrl(inputData.value)) {
-  //   console.log(isValidUrl);
-  //   errorMsg.value = "URL không đúng định dạng";
-  //   responseData.value = null;
-  //   return;
-  // } else {
-  //   errorMsg.value = null;
-  // }
+  // -------------------------loading----------------------
+  loading.value = true;
+  setTimeout(() => {
+    loading.value = false; // ẩn spinner
+  }, 1000);
+
+  // ---------------URL ko định dạng----------------------------
+  if (!isValidUrl(inputData.value)) {
+    console.log(isValidUrl);
+    errorMsg.value = "URL không đúng định dạng";
+    // responseData.value = null;
+    return;
+  } else {
+    errorMsg.value = null;
+  }
+  // ---------------------------------------------------------
   switch (selectRef.value) {
     case 1:
       console.log("get"); // case =1 =1 thì là GET
@@ -266,9 +303,12 @@ const handleGet = async () => {
   try {
     const response = await axios.get(inputData.value);
     responseData.value = response.data;
+    errorMsg.value = null;
     console.log("🚀 ~ file: detail.vue:365 ~ handleGet ~ x:", response.data);
   } catch (error) {
+    errorMsg.value = "Could not send request";
     console.error(error);
+    responseData.value = error.response;
   }
 };
 // ---------------------POST-----------------------
@@ -285,6 +325,7 @@ const handlePost = async () => {
     );
   } catch (error) {
     //console.log(error);
+    responseData.value = error.response;
   }
 };
 
@@ -313,6 +354,7 @@ const handlePut = async () => {
     );
   } catch (error) {
     console.log(error);
+    responseData.value = error.response;
   }
 };
 
@@ -324,6 +366,7 @@ const handleDelete = async () => {
     console.log(response.data);
   } catch (error) {
     console.log(error);
+    responseData.value = error.response;
   }
   // const { data, error, pending, refresh } = await useFetch(inputData.value, {
   //   method: "DELETE",
@@ -490,17 +533,41 @@ const columnsParams = [
     title: "",
     key: "value",
     render(row, index) {
-      return h("div", [
-        h(
-          "button",
-          {
-            onClick() {
-              deleteRow(index);
+      return (
+        "div",
+        [
+          h(
+            "button",
+            {
+              onClick() {
+                deleteRow(index);
+              },
+              class:
+                "bg-slate-100 rounded-full border-none hover:bg-origin-content hover:bg-state-500",
             },
-          },
-          "X"
-        ),
-      ]);
+            [
+              h(
+                "svg",
+                {
+                  xmlns: "http://www.w3.org/2000/svg",
+                  fill: "none",
+                  viewBox: "0 0 24 24",
+                  stroke: "currentColor",
+                  strokeWidth: "1.5",
+                  class: "w-6 h-6",
+                },
+                [
+                  h("path", {
+                    strokeLinecap: "round",
+                    strokeLinejoin: "round",
+                    d: "M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0",
+                  }),
+                ]
+              ),
+            ]
+          ),
+        ]
+      );
     },
   },
 ];
@@ -553,8 +620,26 @@ const deleteRow = (index) => {
     inputData.value = url.href;
   }
 };
-// function isValidUrl(url) {
-//   const urlPattern = /^(http|https):\/\/[^\s/$.?#].[^\s]*$/i;
-//   return urlPattern.test(url);
-// }
+// ----------------------------url không dịnh dạng---------------------
+function isValidUrl(url) {
+  const urlPattern = /^(http|https):\/\/[^\s/$.?#].[^\s]*$/i;
+  return urlPattern.test(url);
+}
 </script>
+
+<style>
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: green;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+</style>

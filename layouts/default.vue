@@ -2,22 +2,22 @@
   <!-- -wp-content-- -->
   <div class="flex ">
     <!-- ----------Sidebar------- -->
-    <div class="bg-#F5F5F5 min-h-screen max-w-screen ">
+    <div class="bg-#F5F5F5 min-h-screen pt-15px pb-10px pr-10px pl-10px box-border w-300px">
       <!-- ----header-sb---------- -->
-      <div class="flex pt-2 pb-2 pr-1 pl-1">
-        <button class=" p-0  border-none bg-#f5f5f5" @click="addCollection">
-          <div class="i-mdi:plus text-xl pr-1"></div>
+      <div class="flex justify-between ">
+        <button class="p-0 border-none bg-#f5f5f5" @click="addCollection">
+          <div class="i-mdi:plus text-xl text-gray-5"></div>
         </button>
 
         <form action="" id="search" class="relative">
-          <input class="pt-1 pb-1 pr-8 pl-10" type="text" />
-          <div class="w-5 p-1 absolute top-0 right-51 bg-none border-none">
-            <div class="i-mdi:equal text-xl"></div>
+          <input class="pt-1.5 pb-1.5 pl-7 pr-4" type="text" />
+          <div class="w-5 p-1 absolute top-0.001 right-45 bg-none border-none">
+            <div class="i-mdi:equal text-xl text-gray-5"></div>
           </div>
         </form>
 
-        <button class="p-0  border-none bg-#f5f5f5">
-          <div class="i-mdi:dots-horizontal text-xl pl-1"></div>
+        <button class="p-0 border-none bg-#f5f5f5">
+          <div class="i-mdi:dots-horizontal text-xl pl-1 text-gray-5 p-"></div>
         </button>
       </div>
       <!-- -----------------------------------content-sb-------------------------------------------- -->
@@ -32,34 +32,17 @@
           v-for="(i, index) in items"
           :key="index"
         >
-          <n-collapse-item title="New Collection" name="" class="p-0">
+          <n-collapse-item title="New Collection" name="" class="pl-2.5px">
             <n-collapse-item
               :title="x.title"
               v-for="(x, index) in i.data"
               :key="index"
             >
-            <nuxt-link to="/detail" class="flex space-x-2 decoration-none ">
-            <p class="text-green text-lg m-0">Get</p>
-            <p class="mt-0 mb-0 ">NewReques</p>
-            </nuxt-link>
-              <!-- <div
-                :title="x.title"
-                v-for="(x, index) in i.data"
-                :key="index"
-              ></div> -->
+              <nuxt-link to="/detail" class="flex space-x-2 decoration-none items-center">
+                <p class="text-green text-3 m-0 font font-400 ">GET</p>
+                <p class="mt-0 mb-0 text-#212121 ">NewRequest</p>
+              </nuxt-link>
             </n-collapse-item>
-
-            <!-- <ClientOnly>
-              <n-dropdown
-                placement="bottom-start"
-                trigger="click"
-                size="small"
-                :options="optionss"
-                @select="clickRequest(index)"
-              >
-                <n-button> = </n-button>
-              </n-dropdown>
-            </ClientOnly> -->
           </n-collapse-item>
           <!-- --------------------dropdown----------------------- -->
 
@@ -70,9 +53,9 @@
             :options="options"
             @select="(key) => clickFolder(index, key)"
           >
-            <n-button class="p-2">
-              <div class="i-mdi:dots-horizontal text-xl"></div>
-            </n-button>
+            <button class="p-2 pr-19px cursor-pointer border-none text-gray-5 i-mdi:dots-horizontal text-xl ">
+              
+            </button>
           </n-dropdown>
         </n-collapse>
       </div>
@@ -94,39 +77,12 @@ const addCollection = () => {
   console.log(newItem);
 };
 
-// const addCollection = () => {
-//   let newItem =
-//      "New Collection"
-
-//   items.value.push(newItem);
-//   console.log(newItem);
-// };
-
-//--------bật dropdown--------
-
-// const optionss = [
-//   {
-//     label: "Add Folder",
-//     //value: "option1",
-//     key: 1,
-//   },
-//   {
-//     label: "Edit",
-//     // value: "option2",
-//     key: 2,
-//   },
-//   {
-//     label: "Delete",
-//     // value: "option3",
-//     key: 3,
-//   },
-// ];
-
 const options = [
   {
     label: "Add Folder",
     //value: "option1",
     key: 1,
+   
   },
   {
     label: "Edit",
@@ -140,13 +96,6 @@ const options = [
   },
 ];
 // ----add folder------
-// const alldata = [
-//   {
-
-//     title: "new colection",
-//     data: [],
-//   },
-// ];
 
 const clickFolder = (index, key) => {
   if (key === 1) {
@@ -156,9 +105,8 @@ const clickFolder = (index, key) => {
     };
     items.value[index].data.push(dataFolder);
   } else if (key === 2) {
-    console.log("key 2")
-  }else {
-
+    console.log("key 2");
+  } else {
   }
 };
 

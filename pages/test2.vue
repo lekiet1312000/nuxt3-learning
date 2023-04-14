@@ -1,195 +1,174 @@
 <template>
-  <div>
-    <n-input v-model:value="inputData" class="my-5" />
-    <n-data-table
-      :columns="columnsParams"
-      :data="dataParams"
-      :row-key="rowKey"
-      @update:checked-row-keys="checkActive"
-    />
+  <div class="box menu">
+    <div class="flex w-100%">
+      <div class="relative w-17%">
+        <n-space vertical>
+          <n-select v-model:value="selectRef" :options="options" />
+        </n-space>
+      </div>
+      <div class="w-70%">
+        <n-input
+          :input-props="{ type: 'url' }"
+          placeholder="Enter URL or paste text"
+          v-model:value="inputData"
+          class="bg-gray-1"
+        />
+      </div>
+
+      <div class="w-13% flex ml-7px">
+        <n-button class="w-75%" type="info" @click="getApi"> Send </n-button>
+        <n-button class="p-0" type="info">
+          <div class="i-mdi:chevron-down text-xl"></div>
+        </n-button>
+      </div>
+    </div>
+  </div>
+  <div class="Response p-4 w-300px min-h-screen box-border">
+    <p>Response</p>
+    <div v-if="errorMsg">
+      <p>{{ errorMsg }}</p>
+    </div>
+    <pre>
+            {{ JSON.stringify(responseData, null, 2) }}
+            </pre
+    >
+    <n-config-provider :hljs="hljs">
+      <my-app />
+    </n-config-provider>
   </div>
 </template>
-
 <script setup>
+import { h, defineComponent } from "vue"; //data-table
+import { NButton, useMessage } from "naive-ui"; ////data-table
+import axios from "axios";
+import { ref, watchEffect } from "vue";
 import { NInput } from "naive-ui";
-
-const rowKey = (row) => {
-  return row.id;
-};
-
-const dataParams = ref([
+const errorMsg = ref();
+const bodyData = ref();
+const inputData = ref(""); // lưu trữ phần tử của input và được sử dụng để gọi hàm useFetch() để tải dữ liệu từ API
+const selectRef = ref(1);
+const responseData = ref();
+const options = [
   {
-    id: 0,
-    key: "",
-    value: "",
-    description: "",
+    label: "GET",
+    value: 1,
   },
   {
-    id: 1,
-    key: "",
-    value: "",
-    description: "",
-  },
-]);
-
-const inputData = ref("");
-
-const columnsParams = [
-  {
-    type: "selection",
+    label: "POST",
+    value: 2,
   },
   {
-    title: "Key",
-    key: "key",
-    render(row, index) {
-      console.log(row);
-      return h(NInput, {
-        value: row.key,
-        onUpdateValue(v) {
-          dataParams.value[index].key = v;
-        },
-        onInput() {
-          // Thêm một dòng mới vào mảng data nếu ô input cuối cùng có giá trị khác rỗng
-          const lastIndex = dataParams.value.length - 1;
-          if (
-            dataParams.value[lastIndex].key !== "" ||
-            dataParams.value[lastIndex].value !== "" ||
-            dataParams.value[lastIndex].description !== ""
-          ) {
-            dataParams.value.push({
-              id: lastIndex + 1,
-              key: "",
-              value: "",
-              description: "",
-            });
-          }
-        },
-      });
-    },
+    label: "PUT",
+    value: 3,
   },
   {
-    title: "Value",
-    key: "value",
-    render(row, index) {
-      return h(NInput, {
-        value: row.age,
-        onUpdateValue(v) {
-          dataParams.value[index].value = v;
-        },
-        onInput() {
-          // Thêm một dòng mới vào mảng data nếu ô input cuối cùng có giá trị khác rỗng
-          const lastIndex = dataParams.value.length - 1;
-          if (
-            dataParams.value[lastIndex].key !== "" ||
-            dataParams.value[lastIndex].value !== "" ||
-            dataParams.value[lastIndex].description !== ""
-          ) {
-            dataParams.value.push({
-              id: lastIndex + 1,
-              key: "",
-              value: "",
-              description: "",
-            });
-          }
-        },
-      });
-    },
+    label: "PATCH",
+    value: 4,
   },
   {
-    title: "Description",
-    key: "description",
-    render(row, index) {
-      return h(NInput, {
-        value: row.address,
-        onUpdateValue(v) {
-          dataParams.value[index].description = v;
-        },
-        onInput() {
-          // Thêm một dòng mới vào mảng data nếu ô input cuối cùng có giá trị khác rỗng
-          const lastIndex = dataParams.value.length - 1;
-          if (
-            dataParams.value[lastIndex].key !== "" ||
-            dataParams.value[lastIndex].value !== "" ||
-            dataParams.value[lastIndex].description !== ""
-          ) {
-            dataParams.value.push({
-              id: lastIndex + 1,
-              key: "",
-              value: "",
-              description: "",
-            });
-          }
-        },
-      });
-    },
-  },
-  {
-    title: "",
-    key: "value",
-    render(row, index) {
-      return h("div", [
-        h(
-          "button",
-          {
-            onClick() {
-              deleteRow(index);
-            },
-          },
-          "delete"
-        ),
-      ]);
-    },
+    label: "DELETE",
+    value: 5,
   },
 ];
+const getApi = (params) => {
+  // -------------------------loading----------------------
 
-// ----------------------------------------cachs2---------------------
-const getRowIdByKey = (key) => {
-  const row = dataParams.value.find((row) => row.key === key);
-  return row ? row.id : null;
-};
-const checkActive = (checkedRowKeys) => {
-  let url;
-  try {
-    url = new URL(inputData.value);
-  } catch (error) {
-    console.log("Invalid URL:", inputData.value);
+  // ---------------URL ko định dạng----------------------------
+  if (!isValidUrl(inputData.value)) {
+    console.log(isValidUrl);
+    errorMsg.value = "URL không đúng định dạng";
+    responseData.value = null;
     return;
+  } else {
+    errorMsg.value = null;
   }
-
-  const searchParams = url.searchParams;
-
-  //Xóa các cặp key-value được thêm vào URL bởi checkActive
-  [...searchParams.keys()]
-    .filter((key) => !checkedRowKeys.includes(getRowIdByKey(key)))
-    .forEach((key) => searchParams.delete(key));
-
-  // Thêm các cặp key-value vào URL
-  const newParams = dataParams.value
-    .filter((row) => checkedRowKeys.includes(row.id))
-    .map((row) => `${row.key}=${row.value}`)
-    .join("&");
-
-  // Thay đổi query parameter trên URL và lưu vào inputParams
-  url.search = newParams;
-  inputData.value = url.href;
+  // ---------------------------------------------------------
+  switch (selectRef.value) {
+    case 1:
+      console.log("get"); // case =1 =1 thì là GET
+      handleGet(); // đặt hàm GET ở đây để chạy GET ở dưới
+      break;
+    case 2:
+      console.log("post");
+      handlePost();
+      break;
+    case 3:
+      console.log("put");
+      handlePut();
+      break;
+    case 4:
+      console.log("patch");
+      handlePatch();
+      break;
+    case 5:
+      console.log("delete");
+      handleDelete();
+      break;
+    default:
+      break;
+  }
 };
-const deleteRow = (index) => {
-  const deletedRow = dataParams.value.splice(index, 1)[0];
 
-  // Xóa các query parameter tương ứng khỏi URL
-  let url;
+const handleGet = async () => {
   try {
-    url = new URL(inputData.value);
+    const response = await axios.get(inputData.value);
+    responseData.value = response.data;
+    errorMsg.value = null;
+    console.log("🚀 ~ file: detail.vue:365 ~ handleGet ~ x:", response.data);
   } catch (error) {
-    console.log("Invalid URL:", inputData.value);
-    return;
-  }
-
-  const searchParams = url.searchParams;
-  if (searchParams.has(deletedRow.key)) {
-    searchParams.delete(deletedRow.key);
-    // Cập nhật lại giá trị của ô input
-    inputData.value = url.href;
+    console.error(error);
+    responseData.value = error.response;
   }
 };
+// ---------------------POST-----------------------
+const handlePost = async () => {
+  try {
+    const response = await axios.post(
+      inputData.value,
+      bodyData.value ? JSON.parse(bodyData.value) : null // nếu điều kiện về thứ nhất đúng sẽ lấy gtri vế t2-toán tử 3 ngôi
+    ); //trả ra null ở bodyData chứ ko phải response
+    responseData.value = response.data;
+    console.log(
+      "🚀 ~ file: detail.vue:373 ~ handlePost ~ data:",
+      response.data
+    );
+  } catch (error) {
+    //console.log(error);
+    responseData.value = error.response;
+  }
+};
+
+// --------------------------------------PUT---------------------------------
+const handlePut = async () => {
+  try {
+    const response = await axios.put(
+      inputData.value,
+      JSON.parse(bodyData.value)
+    );
+    responseData.value = response.data;
+    console.log(
+      "🚀 ~ file: detail.vue:373 ~ handlePost ~ data:",
+      response.data
+    );
+  } catch (error) {
+    console.log(error);
+    responseData.value = error.response;
+  }
+};
+
+// ----------------------------------DELETE------------------------------
+const handleDelete = async () => {
+  try {
+    const response = await axios.delete(inputData.value);
+    responseData.value = response.data;
+    console.log(response.data);
+  } catch (error) {
+    console.log(error);
+    responseData.value = error.response;
+  }
+};
+function isValidUrl(url) {
+  const urlPattern = /^(http|https):\/\/[^\s/$.?#].[^\s]*$/i;
+  return urlPattern.test(url);
+}
 </script>

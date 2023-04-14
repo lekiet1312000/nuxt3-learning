@@ -1,10 +1,10 @@
-<template>
+<template >
   <!-- ------------------------------------------Page--------------------------------------------------- -->
-  <div class="content bg-white w-700 pr-5 pl-5  pb-2">
-    <div>
-      <div class="layout-header flex justify-between p-2">
-        <div >
-          <p >New Collection</p>
+  <div class="Page bg-white w-100% ">
+    <div >
+      <div class="layout-header flex justify-between p-2 ">
+        <div>
+          <p>New Collection</p>
         </div>
         <div class="mr-5">
           <nav>
@@ -41,7 +41,7 @@
       </div>
       <hr />
       <div class="layout content">
-        <div class="box menu">
+        <div class="box menu ">
           <n-card >
             <n-tabs type="line" animated>
               <n-tab-pane name="oasis" tab="Auth">  </n-tab-pane>
