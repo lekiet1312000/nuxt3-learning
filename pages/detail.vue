@@ -170,6 +170,7 @@
                 ref="input"
                 v-model="bodyData"
                 @keyup.enter.prevent="submitInput"
+                class="w-180 h-100"
               ></textarea>
               <!-- <pre>{{ JSON.stringify(value, null, 2) }}</pre> -->
               <!-- <div>{{ bodyData }}</div> -->
@@ -184,13 +185,15 @@
 
           <div class="overflow-auto max-h-550px">
             <div v-if="loading" class="spinner absolute top-60"></div>
-            <div v-else>
-              <pre class="w-350px whitespace-pre-wrap pl-1 m-0">{{
-                JSON.stringify(responseData, null, 2)
-              }}</pre>
+            <div v-else class="w-350px whitespace-pre-wrap pl-1 m-0">
+              <n-config-provider :hljs="hljs">
+                <n-code
+                  :code="JSON.stringify(responseData, null, 2)"
+                  language="json"
+                />
+              </n-config-provider>
             </div>
           </div>
-
           <!-- ----------------Lỗi Url------------------- -->
           <div v-if="errorMsg">
             <p>{{ errorMsg }}</p>
@@ -207,27 +210,26 @@ import { NButton, useMessage } from "naive-ui"; ////data-table
 import axios from "axios";
 import { ref, watchEffect } from "vue";
 import { NInput } from "naive-ui";
+import hljs from "highlight.js/lib/core";
+import json from "highlight.js/lib/languages/json";
 
 const loading = ref(false);
 const errorMsg = ref();
 const value2 = ref(2);
-
 const value1 = ref(1);
 const bodyData = ref();
 const inputData = ref(""); // lưu trữ phần tử của input và được sử dụng để gọi hàm useFetch() để tải dữ liệu từ API
-
 const selectRef = ref(1);
-const responseData = ref(); // lưu trữ dữ liệu nhận được từ API.Dữ liệu này sẽ được hiển thị trên màn hình để người dùng có thể xem
+const responseData = ref();
+hljs.registerLanguage("json", json);
+// lưu trữ dữ liệu nhận được từ API.Dữ liệu này sẽ được hiển thị trên màn hình để người dùng có thể xem
 // const getApi = async () => {
 //   //hàm này được sử dụng để gọi hàm useFetch() để tải dữ liệu từ API. Sau đó, dữ liệu nhận được từ API sẽ được lưu trữ trong biến responseData, và được hiển thị trên màn hình để người dùng có thể xem.
 //   const { data: test } = await useFetch(inputData.value);
 //   console.log(test);
-
 //   responseData.value = JSON.stringify(test.value, undefined, 2);
 // };
-
 // -----------------------hidden--------------------------
-
 const showContent = ref(true);
 function toggleContent() {
   showContent.value = !showContent.value; // ! thay đổi true flash
@@ -255,14 +257,12 @@ const options = [
     value: 5,
   },
 ];
-
 const getApi = (params) => {
   // -------------------------loading----------------------
   loading.value = true;
   setTimeout(() => {
     loading.value = false; // ẩn spinner
   }, 1000);
-
   // ---------------URL ko định dạng----------------------------
   if (!isValidUrl(inputData.value)) {
     console.log(isValidUrl);
@@ -311,6 +311,7 @@ const handleGet = async () => {
     responseData.value = error.response;
   }
 };
+
 // ---------------------POST-----------------------
 const handlePost = async () => {
   try {
@@ -328,15 +329,12 @@ const handlePost = async () => {
     responseData.value = error.response;
   }
 };
-
 // --------------------------sử dụng axios-----------------------------
 // const handlePost = async () => {
 //   const { data, error, pending, refresh } = await useFetch(inputData.value, {
 //     method: "POST",
-
 //     body: JSON.parse(bodyData.value),
 //   });
-
 //   responseData.value = data.value;
 //   console.log("🚀 ~ file: detail.vue:373 ~ handlePost ~ data:", data.value);
 // };
@@ -357,7 +355,6 @@ const handlePut = async () => {
     responseData.value = error.response;
   }
 };
-
 // ----------------------------------DELETE------------------------------
 const handleDelete = async () => {
   try {
@@ -375,7 +372,6 @@ const handleDelete = async () => {
   // console.log("🚀 ~ file: detail.vue:373 ~ handleDelete ~ data:", data);
 };
 // -----------------------------Header--------------------
-
 const columns = [
   {
     title: "Key",
@@ -389,7 +385,6 @@ const columns = [
     title: "Description",
     key: "length",
   },
-
   {
     title: "Bulk Edit",
     key: "length",
@@ -404,7 +399,6 @@ const data = [
 ];
 let pagination = false;
 // --------------------end--data-Table----------------
-
 // ---------------------Body---------------------
 const optionsRaw = [
   {
@@ -418,13 +412,10 @@ const optionsJson = [
     value: 2,
   },
 ];
-
 //--------------------Params--------------------------
-
 const rowKey = (row) => {
   return row.id;
 };
-
 const dataParams = ref([
   {
     id: 0,
@@ -439,7 +430,6 @@ const dataParams = ref([
     description: "",
   },
 ]);
-
 const columnsParams = [
   {
     type: "selection",
@@ -571,7 +561,6 @@ const columnsParams = [
     },
   },
 ];
-
 const getRowIdByKey = (key) => {
   const row = dataParams.value.find((row) => row.key === key);
   return row ? row.id : null;
@@ -584,25 +573,20 @@ const checkActive = (checkedRowKeys) => {
     console.log("Invalid URL:", inputData.value);
     return;
   }
-
   const searchParams = url.searchParams;
-
   //Xóa các cặp key-value được thêm vào URL bởi checkActive
   [...searchParams.keys()] //...được sử dụng để bóc tách một mảng hoặc một đối tượng thành các phần tử riêng lẻ
     .filter((key) => !checkedRowKeys.includes(getRowIdByKey(key)))
     .forEach((key) => searchParams.delete(key));
-
   // Thêm các cặp key-value vào URL
   const newParams = dataParams.value
     .filter((row) => checkedRowKeys.includes(row.id))
     .map((row) => `${row.key}=${row.value}`)
     .join("&");
-
   // Thay đổi query parameter trên URL và lưu vào inputParams
   url.search = newParams;
   inputData.value = url.href;
 };
-
 // Xóa các query parameter tương ứng khỏi URL
 const deleteRow = (index) => {
   const deletedRow = dataParams.value.splice(index, 1)[0];
@@ -613,7 +597,6 @@ const deleteRow = (index) => {
     console.log("Invalid URL:", inputData.value);
     return;
   }
-
   const searchParams = url.searchParams;
   if (searchParams.has(deletedRow.key)) {
     searchParams.delete(deletedRow.key);
@@ -636,7 +619,6 @@ function isValidUrl(url) {
   height: 40px;
   animation: spin 1s linear infinite;
 }
-
 @keyframes spin {
   to {
     transform: rotate(360deg);

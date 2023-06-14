@@ -1,6 +1,6 @@
 <template >
   <!-- ------------------------------------------Page--------------------------------------------------- -->
-  <div class="Page bg-white w-100% ">
+  <div class="Page bg-white w-100% pt-1 pb-1 pr-5 pl-5">
     <div >
       <div class="layout-header flex justify-between p-2 ">
         <div>
